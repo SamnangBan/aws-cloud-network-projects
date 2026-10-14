@@ -4,7 +4,7 @@
 Build a custom AWS VPC by hand with public and private subnets, a bastion host for SSH access, and a NAT Gateway for outbound-only internet access.
 
 ## Architecture
-![VPC diagram](vpc-diagram.png)
+![VPC diagram](images/vpc-diagram.png)
 
 ## CIDR plan
 | Subnet | AZ | CIDR | Usable IPs |
@@ -25,16 +25,32 @@ VPC CIDR: `10.0.0.0/16`
 
 ## Results
 **Public route table**
-![public-rt](public-rt.png)
+![public-rt](images/public-rt.png)
 
 **SSH hop: laptop → bastion → private server (agent forwarding)**
-![ssh hop](ssh-hop.png)
+![ssh hop](images/ssh-hop.png)
 
 **Before NAT: private server has no internet**
-![ping fail](ping-fail.png)
+```
+[ec2-user@ip-10-0-3-166 ~]$ ping -c 3 8.8.8.8
+PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.
+
+--- 8.8.8.8 ping statistics ---
+3 packets transmitted, 0 received, 100% packet loss, time 2057ms
+```
 
 **After NAT: outbound traffic works**
-![ping success](ping-success.png)
+```
+[ec2-user@ip-10-0-3-166 ~]$ ping -c 3 8.8.8.8
+64 bytes from 8.8.8.8: icmp_seq=1 ttl=116 time=2.49 ms
+64 bytes from 8.8.8.8: icmp_seq=2 ttl=116 time=1.37 ms
+64 bytes from 8.8.8.8: icmp_seq=3 ttl=116 time=1.08 ms
+
+3 packets transmitted, 3 received, 0% packet loss
+
+[ec2-user@ip-10-0-3-166 ~]$ curl -I https://aws.amazon.com
+HTTP/2 200
+```
 
 ## What I learned
 - A subnet is public only if its route table has a route to an Internet Gateway.
